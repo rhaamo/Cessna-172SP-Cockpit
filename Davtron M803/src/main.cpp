@@ -12,6 +12,12 @@
 #include "font_dseg14_c_m_60.h"
 #include "orbitron_24.h"
 
+/*
+ * Issues:
+ * sim/cockpit2/clock_timer/elapsed_time_seconds isn't sent over UDP
+ * laminar/c172/knob_OAT isn't sent over UDP
+ */
+
 //---------------------------------------------------------------
 //  Sample X-Plane UDP Communications for Arduino ESP8266 Variant
 //  Copyright(c) 2019 by David Prue <dave@prue.com>
