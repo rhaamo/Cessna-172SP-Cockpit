@@ -307,6 +307,8 @@ void subscribe(char *dref, uint32_t freq, uint32_t index)
   Serial.print("Subscribed to dref \"");
   Serial.print(dref);
   Serial.println("\"");
+  // We need a little delay after subscribing or for some reasons some packets get lost
+  delay(400);
 }
 
 void loop()
@@ -385,7 +387,7 @@ void loop()
         // Elapsed Time (ET)
         subscribe("sim/cockpit2/clock_timer/elapsed_time_hours", 1, 40);
         subscribe("sim/cockpit2/clock_timer/elapsed_time_minutes", 1, 41);
-        subscribe("sim/cockpit2/clock_timer/elapsed_time_seconds", 1, 42);
+        subscribe("sim/cockpit2/clock_timer/elapsed_time_seconds", 2, 42);
 
         // Outside Air Temperature in degC
         subscribe("sim/cockpit2/temperature/outside_air_temp_degc", 1, 50);
@@ -405,11 +407,11 @@ void loop()
 
         // Timer mode (RW)
         // UT=0 LT=1 FT=2 ET=3
-        subscribe("sim/cockpit2/clock_timer/timer_mode", 20, 70);
+        subscribe("sim/cockpit2/clock_timer/timer_mode", 2, 70);
 
         // OAT mode
         // degF=0, degC=1, volts=2
-        subscribe("laminar/c172/knob_OAT", 100, 71);
+        subscribe("laminar/c172/knob_OAT", 1, 71);
       }
       break;
 
@@ -435,6 +437,10 @@ void loop()
               last_zulu_hours = value;
               refreshBottom();
             }
+            #ifdef DEBUG
+              Serial.print("zulu_time_hours: ");
+              Serial.println(String(value, 0));
+            #endif
             break;
           case 11:
             if (last_zulu_minutes != value) {
@@ -443,6 +449,10 @@ void loop()
               last_zulu_minutes = value;
               refreshBottom();
             }
+            #ifdef DEBUG
+              Serial.print("zulu_time_minutes: ");
+              Serial.println(String(value, 0));
+            #endif
             break;
 
           case 20:
@@ -452,6 +462,10 @@ void loop()
               last_lt_hours = value;
               refreshBottom();
             }
+            #ifdef DEBUG
+              Serial.print("local_time_hours: ");
+              Serial.println(String(value, 0));
+            #endif
             break;
           case 21:
             if (last_lt_minutes != value) {
@@ -460,6 +474,10 @@ void loop()
               last_lt_minutes = value;
               refreshBottom();
             }
+            #ifdef DEBUG
+              Serial.print("local_time_minutes: ");
+              Serial.println(String(value, 0));
+            #endif
             break;
 
           case 30:
@@ -469,6 +487,10 @@ void loop()
               last_hobbs_hours = value;
               refreshBottom();
             }
+            #ifdef DEBUG
+              Serial.print("hobbs_time_hours: ");
+              Serial.println(String(value, 0));
+            #endif
             break;
           case 31:
             if (last_hobbs_minutes != value) {
@@ -477,6 +499,10 @@ void loop()
               last_hobbs_minutes = value;
               refreshBottom();
             }
+            #ifdef DEBUG
+              Serial.print("hobbs_time_minutes: ");
+              Serial.println(String(value, 0));
+            #endif
             break;
 
           case 40:
@@ -486,6 +512,10 @@ void loop()
               last_elapsed_hours = value;
               refreshBottom();
             }
+            #ifdef DEBUG
+              Serial.print("elapsed_time_hours: ");
+              Serial.println(String(value, 0));
+            #endif
             break;
           case 41:
             if (last_elapsed_minutes != value) {
@@ -494,6 +524,10 @@ void loop()
               last_elapsed_minutes = value;
               refreshBottom();
             }
+            #ifdef DEBUG
+              Serial.print("elapsed_time_minutes: ");
+              Serial.println(String(value, 0));
+            #endif
             break;
           case 42:
             Serial.println(value);
@@ -503,6 +537,10 @@ void loop()
               last_elapsed_seconds = value;
               refreshBottom();
             }
+            #ifdef DEBUG
+              Serial.print("elapsed_time_seconds: ");
+              Serial.println(String(value, 0));
+            #endif
             break;
 
           case 50:
@@ -512,6 +550,10 @@ void loop()
               last_degC = value;
               refreshTop();
             }
+            #ifdef DEBUG
+              Serial.print("outside_air_temp_degc: ");
+              Serial.println(String(value, 0));
+            #endif
             break;
             
           case 51:
@@ -521,6 +563,10 @@ void loop()
               last_degF = value;
               refreshTop();
             }
+            #ifdef DEBUG
+              Serial.print("outside_air_temp_degf: ");
+              Serial.println(String(value, 0));
+            #endif
             break;
 
           case 55:
@@ -530,6 +576,10 @@ void loop()
               last_volts = value;
               refreshTop();
             }
+            #ifdef DEBUG
+              Serial.print("battery_voltage_actual_volts: ");
+              Serial.println(String(value, 0));
+            #endif
             break;
 
           case 60:
@@ -539,6 +589,10 @@ void loop()
               last_timer_running = value;
               refreshBottom();
             }
+            #ifdef DEBUG
+              Serial.print("timer_running: ");
+              Serial.println(String(value, 0));
+            #endif
             break;
 
           case 70:
@@ -550,6 +604,10 @@ void loop()
               refreshIndicator();
               refreshBottom();
             }
+            #ifdef DEBUG
+              Serial.print("timer_mode: ");
+              Serial.println(String(value, 0));
+            #endif
             break;
             
           case 71:
@@ -560,6 +618,10 @@ void loop()
               mode_top = value;
               refreshTop();
             }
+            #ifdef DEBUG
+              Serial.print("oat_mode: ");
+              Serial.println(String(value, 0));
+            #endif
             break;
 
             // case 42:
