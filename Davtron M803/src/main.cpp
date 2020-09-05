@@ -12,12 +12,6 @@
 #include "font_dseg14_c_m_60.h"
 #include "orbitron_24.h"
 
-/*
- * Issues:
- * sim/cockpit2/clock_timer/elapsed_time_seconds isn't sent over UDP
- * laminar/c172/knob_OAT isn't sent over UDP
- */
-
 //---------------------------------------------------------------
 //  Sample X-Plane UDP Communications for Arduino ESP8266 Variant
 //  Copyright(c) 2019 by David Prue <dave@prue.com>
@@ -66,8 +60,6 @@ int retry = 30;
 
 TFT_eSPI tft = TFT_eSPI();
 
-#define BACKGROUND_COLOR TFT_ORANGE
-
 enum modes_timer { MODE_UT, MODE_LT, MODE_FT, MODE_ET };
 enum modes_top { MODE_DEGF, MODE_DEGC, MODE_VOLTS };
 int mode_timer = MODE_UT;
@@ -92,6 +84,8 @@ int last_elapsed_seconds = 0;
 
 int last_timer_running = 0;
 
+int background_color = tft.color565(239, 124, 58);
+
 // row 0 = top, row 1 = bottom
 void displayText(int row, char *msg) {
   int x, y = 0;
@@ -112,28 +106,28 @@ void clearIndicator() {
     10, 120+24+5+3,
     10+(30/2), 120+24+3,
     10+30, 120+24+5+3,
-    BACKGROUND_COLOR
+    background_color
   );
   // LT
   tft.fillTriangle(
     4+48, 120+24+5+3,
     4+48+(30/2), 120+24+3,
     4+48+30, 120+24+5+3,
-    BACKGROUND_COLOR
+    background_color
   );
   // FT
   tft.fillTriangle(
     10, 120+24+24+5+3+10,
     10+(30/2), 120+24+24+3+10,
     10+30, 120+24+24+5+3+10,
-    BACKGROUND_COLOR
+    background_color
   );
   // ET
   tft.fillTriangle(
     4+48, 120+24+24+5+3+10,
     4+48+(30/2), 120+24+24+3+10,
     4+48+30, 120+24+24+5+3+10,
-    BACKGROUND_COLOR
+    background_color
   );
 }
 
@@ -174,19 +168,18 @@ void refreshIndicator() {
 }
 
 void refreshTop() {
-  String str;
+  tft.fillRect(0, 0, 320, 100, background_color); // clear old text
+
+  char str[5];
   switch (mode_top) {
     case MODE_DEGF:
-      str = String(last_degF, 1);
-      str += " F";
+      sprintf(str, "%d F", (int)last_degF);
       break;
     case MODE_DEGC:
-      str = String(last_degC, 1);
-      str += " C";
+      sprintf(str, "%d C", (int)last_degC);
       break;
     case MODE_VOLTS:
-      str = String(last_volts, 1);
-      str += " E";
+      sprintf(str, "%.1f E", ((int)(10 * last_volts)) / 10.0);
       break;
   }
 
@@ -204,11 +197,11 @@ void refreshBottom() {
   char str[5];
   switch (mode_timer) {
     case MODE_UT:
-      sprintf(str, "%02d:%02d", last_zulu_hours, last_zulu_minutes);
+      sprintf(str, "%02d:%02d  ", last_zulu_hours, last_zulu_minutes);
       break;
 
     case MODE_LT:
-      sprintf(str, "%02d:%02d", last_lt_hours, last_lt_minutes);
+      sprintf(str, "%02d:%02d  ", last_lt_hours, last_lt_minutes);
       break;
 
     case MODE_FT:
@@ -224,8 +217,6 @@ void refreshBottom() {
       break;
   }
 
-  Serial.print("display time: ");
-  Serial.println(str);
   tft.setFreeFont(DSEG14_60);
   tft.drawString(str, 95, 135, GFXFF);
   refreshIndicator();
@@ -233,10 +224,10 @@ void refreshBottom() {
 }
 
 void initDisplay() {
-  tft.fillScreen(BACKGROUND_COLOR);
+  tft.fillScreen(background_color);
   tft.fillRect(0, 115, 320, 5, TFT_BLACK);
   tft.setFreeFont(CF_OL20);
-  tft.setTextColor(TFT_BLACK, BACKGROUND_COLOR);
+  tft.setTextColor(TFT_BLACK, background_color);
   drawModes();
   refreshIndicator();
 }
@@ -257,7 +248,7 @@ void setup()
   tft.setRotation(1);
   initDisplay();
 
-  displayText(0, "init");
+  displayText(0, "init...");
 
   // Wait for connection
   while ((retry-- > 0) && (WiFi.status() != WL_CONNECTED))
@@ -317,16 +308,8 @@ void loop()
   // try setting up again
   if (state == STATE_IDLE)
   {
-    displayText(0, "Err");
-    displayText(1, "Idle");
     setup();
     return;
-  }
-
-  if (state == STATE_SEARCH) {
-    // displayText(0, "Err");
-    // displayText(1, "search");
-
   }
 
   // See if we have a UDP Packet
@@ -530,7 +513,6 @@ void loop()
             #endif
             break;
           case 42:
-            Serial.println(value);
             if (last_elapsed_seconds != value) {
               Serial.print("elapsed_time_seconds: ");
               Serial.println(String(value, 0));
